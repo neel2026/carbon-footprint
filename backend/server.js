@@ -15,6 +15,7 @@ const ALLOWED_ORIGINS = [
   'https://carbon-tracker-rust.vercel.app'
 ];
 
+app.set('trust proxy', 1);
 app.use(helmet());
 app.use(cors({
   origin: (origin, cb) => {
