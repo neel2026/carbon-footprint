@@ -90,8 +90,15 @@ Rules:
 
     res.json(insight);
   } catch (error) {
-    res.status(500).json({ error: 'Something went wrong. Please try again.' });
+    console.error("AI Insight Error:", error);
+    res.status(500).json({ error: error.message || 'Something went wrong. Please try again.' });
   }
 });
 
-app.listen(port, () => {});
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(port, () => {
+    console.log(`Local server listening on port ${port}`);
+  });
+}
+
+export default app;
