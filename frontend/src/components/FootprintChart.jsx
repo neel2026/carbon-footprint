@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 import { CHART_INNER_RADIUS, CHART_OUTER_RADIUS } from '../utils/constants';
@@ -15,19 +15,20 @@ const CustomTooltip = ({ active, payload }) => {
 };
 CustomTooltip.propTypes = { active: PropTypes.bool, payload: PropTypes.array };
 
-const ChartLegend = ({ data }) => (
-  <div className="footprint-chart__legend">
+const ChartLegend = memo(({ data }) => (
+  <ul className="footprint-chart__legend" aria-label="Chart legend">
     {data.map(entry => (
-      <div key={entry.name} className="footprint-chart__legend-item">
-        <span className={`footprint-chart__legend-color legend-color--${entry.name.toLowerCase()}`} />
+      <li key={entry.name} className="footprint-chart__legend-item">
+        <span className={`footprint-chart__legend-color legend-color--${entry.name.toLowerCase()}`} aria-hidden="true" />
         <span className="footprint-chart__legend-label">{entry.name}</span>
-      </div>
+      </li>
     ))}
-  </div>
-);
+  </ul>
+));
+ChartLegend.displayName = 'ChartLegend';
 ChartLegend.propTypes = { data: PropTypes.array.isRequired };
 
-const ChartViz = ({ data }) => (
+const ChartViz = memo(({ data }) => (
   <div className="footprint-chart__viz">
     <ResponsiveContainer width="100%" height={200}>
       <PieChart>
@@ -38,10 +39,11 @@ const ChartViz = ({ data }) => (
       </PieChart>
     </ResponsiveContainer>
   </div>
-);
+));
+ChartViz.displayName = 'ChartViz';
 ChartViz.propTypes = { data: PropTypes.array.isRequired };
 
-const FootprintChart = ({ breakdown, total }) => {
+const FootprintChart = memo(({ breakdown, total }) => {
   const data = useMemo(() => [
     { name: 'Transport', value: breakdown.transport, color: COLORS.transport },
     { name: 'Diet', value: breakdown.diet, color: COLORS.diet },
@@ -50,17 +52,18 @@ const FootprintChart = ({ breakdown, total }) => {
   ].filter(item => item.value > 0), [breakdown]);
 
   return (
-    <div className="footprint-chart fade-in" aria-label="Carbon footprint breakdown chart">
+    <section className="footprint-chart fade-in" role="region" aria-label="Carbon footprint breakdown chart">
       <div className="footprint-chart__total">
         <span className="footprint-chart__number">{total.toFixed(1)}</span>
-        <span className="footprint-chart__unit">kg CO₂</span>
+        <span className="footprint-chart__unit">kg CO₂ this week</span>
       </div>
       <ChartViz data={data} />
       <ChartLegend data={data} />
-    </div>
+    </section>
   );
-};
+});
 
+FootprintChart.displayName = 'FootprintChart';
 FootprintChart.propTypes = {
   breakdown: PropTypes.shape({ transport: PropTypes.number.isRequired, diet: PropTypes.number.isRequired, energy: PropTypes.number.isRequired, shopping: PropTypes.number.isRequired }).isRequired,
   total: PropTypes.number.isRequired,

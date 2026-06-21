@@ -306,10 +306,38 @@ body {
 .fade-in {
   animation: slideIn 0.8s ease-out forwards;
   opacity: 0;
+  will-change: transform, opacity;
 }
 
 .delay-1 {
   animation-delay: 0.4s;
+}
+
+/* Accessibility Focus & Skip Link */
+*:focus-visible {
+  outline: 3px solid var(--color-accent) !important;
+  outline-offset: 2px !important;
+}
+
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-accent);
+  color: #fff;
+  padding: 8px;
+  z-index: 100;
+  transition: top 0.2s;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+main:focus {
+  outline: none;
 }
 
 /* AI Insight */

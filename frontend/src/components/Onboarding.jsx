@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import { memo, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 const OnboardingPropTypes = {
   onComplete: PropTypes.func.isRequired,
 };
 
-const Onboarding = ({ onComplete }) => {
+const Onboarding = memo(({ onComplete }) => {
   const [profile, setProfile] = useState({
     name: '',
     country: 'India',
@@ -13,18 +13,18 @@ const Onboarding = ({ onComplete }) => {
     dietType: 'omnivore'
   });
 
-  const handleChange = (e) => {
+  const handleChange = useCallback((e) => {
     const { name, value } = e.target;
     setProfile(prev => ({ ...prev, [name]: value }));
-  };
+  }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = useCallback((e) => {
     e.preventDefault();
     onComplete(profile);
-  };
+  }, [onComplete, profile]);
 
   return (
-    <div className="onboarding-container">
+    <section className="onboarding-container" aria-label="Onboarding setup">
       <h1 className="onboarding-title">Your Carbon Story</h1>
       <p className="onboarding-subtitle">Let's start with a few basics to personalize your experience.</p>
       <form onSubmit={handleSubmit} className="onboarding-form">
@@ -68,9 +68,10 @@ const Onboarding = ({ onComplete }) => {
         </div>
         <button type="submit" className="onboarding-submit-btn">Continue</button>
       </form>
-    </div>
+    </section>
   );
-};
+});
 
+Onboarding.displayName = 'Onboarding';
 Onboarding.propTypes = OnboardingPropTypes;
 export default Onboarding;

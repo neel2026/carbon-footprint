@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FootprintForm from './FootprintForm';
 import ProgressTracker from './ProgressTracker';
@@ -10,17 +11,18 @@ const DashboardViewPropTypes = {
   history: PropTypes.array.isRequired
 };
 
-export const DashboardView = ({ profile, handleFootprintSubmit, isLoading, error, history }) => (
-  <div className="dashboard-view">
+export const DashboardView = memo(({ profile, handleFootprintSubmit, isLoading, error, history }) => (
+  <section className="dashboard-view" aria-label="Dashboard">
     <FootprintForm 
       onSubmit={handleFootprintSubmit} 
       isLoading={isLoading} 
       profile={profile} 
     />
-    {error && <div className="app-error" role="alert">{error}</div>}
-    {isLoading && <div className="app-loading" role="status" aria-label="Generating your insight">Generating your insight...</div>}
+    {error && <div className="app-error" role="alert" aria-live="assertive">{error}</div>}
+    {isLoading && <div className="app-loading" role="status" aria-live="polite">Generating your insight...</div>}
     <ProgressTracker history={history} />
-  </div>
-);
+  </section>
+));
 
+DashboardView.displayName = 'DashboardView';
 DashboardView.propTypes = DashboardViewPropTypes;

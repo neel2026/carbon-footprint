@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 
 const ActionCardPropTypes = {
@@ -17,25 +18,24 @@ const getCategoryIcon = (category) => {
   return map[category] || '💡';
 };
 
-const ActionCard = ({ action, estimatedSavingKg, difficulty, category }) => {
-  return (
-    <div className="action-card action-card--highlight">
-      <div className="action-card__header">
-        <span className="action-card__icon" role="img" aria-label={category}>
-          {getCategoryIcon(category)}
-        </span>
-        <span className={`action-card__badge action-card__badge--${difficulty}`}>
-          {difficulty}
-        </span>
-      </div>
-      <h3 className="action-card__title">{action}</h3>
-      <div className="action-card__saving">
-        <span className="action-card__saving-number">{Number(estimatedSavingKg).toFixed(1)}</span>
-        <span className="action-card__saving-text"> kg CO₂ savings</span>
-      </div>
+const ActionCard = memo(({ action, estimatedSavingKg, difficulty, category }) => (
+  <article className="action-card action-card--highlight" aria-label={`Suggested action for ${category}`}>
+    <div className="action-card__header">
+      <span className="action-card__icon" role="img" aria-label={category}>
+        {getCategoryIcon(category)}
+      </span>
+      <span className={`action-card__badge action-card__badge--${difficulty}`}>
+        {difficulty}
+      </span>
     </div>
-  );
-};
+    <h3 className="action-card__title">{action}</h3>
+    <div className="action-card__saving">
+      <span className="action-card__saving-number">{Number(estimatedSavingKg).toFixed(1)}</span>
+      <span className="action-card__saving-text"> kg CO₂ savings</span>
+    </div>
+  </article>
+));
 
+ActionCard.displayName = 'ActionCard';
 ActionCard.propTypes = ActionCardPropTypes;
 export default ActionCard;

@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { calculateStreak, calculateTrend } from '../utils/carbon.js';
 
@@ -9,7 +9,7 @@ const ProgressTrackerPropTypes = {
   })).isRequired,
 };
 
-const ProgressTracker = ({ history }) => {
+const ProgressTracker = memo(({ history }) => {
   const streak = useMemo(() => calculateStreak(history), [history]);
   const trend = useMemo(() => calculateTrend(history), [history]);
 
@@ -22,10 +22,10 @@ const ProgressTracker = ({ history }) => {
   const trendAbs = Math.abs(trend).toFixed(1);
 
   return (
-    <div className="progress-tracker">
+    <section className="progress-tracker" aria-label="Your tracking progress">
       <div className="progress-tracker__streak">
         <span className="progress-tracker__icon" role="img" aria-label="streak">🔥</span>
-        <span className="progress-tracker__text">{streak} week streak</span>
+        <span className="progress-tracker__text">{streak} day streak</span>
       </div>
       
       {history.length >= 2 && (
@@ -35,9 +35,10 @@ const ProgressTracker = ({ history }) => {
           </span>
         </div>
       )}
-    </div>
+    </section>
   );
-};
+});
 
+ProgressTracker.displayName = 'ProgressTracker';
 ProgressTracker.propTypes = ProgressTrackerPropTypes;
 export default ProgressTracker;

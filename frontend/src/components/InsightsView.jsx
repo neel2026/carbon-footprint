@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import FootprintChart from './FootprintChart';
 import ActionCard from './ActionCard';
@@ -8,11 +9,11 @@ const InsightsViewPropTypes = {
   handleBack: PropTypes.func.isRequired
 };
 
-export const InsightsView = ({ insight, handleBack }) => (
-  <div className="insights-view" aria-live="polite">
+export const InsightsView = memo(({ insight, handleBack }) => (
+  <section className="insights-view" aria-live="polite" aria-label="Carbon footprint insights">
     <div className="insights-view__header">
       <h2>Your Insights</h2>
-      <button onClick={handleBack} className="btn-secondary">Log another entry</button>
+      <button onClick={handleBack} className="btn-secondary" type="button">Log another entry</button>
     </div>
     <div className="insights-content">
       <FootprintChart breakdown={insight.currentEntry.breakdown} total={insight.currentEntry.total} />
@@ -24,7 +25,8 @@ export const InsightsView = ({ insight, handleBack }) => (
       />
       <AIInsight recommendation={insight.recommendation} explanation={insight.savingExplanation} />
     </div>
-  </div>
-);
+  </section>
+));
 
+InsightsView.displayName = 'InsightsView';
 InsightsView.propTypes = InsightsViewPropTypes;

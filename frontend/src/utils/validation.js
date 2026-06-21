@@ -1,7 +1,8 @@
 import {
   MAX_KM_INPUT,
   MAX_MEALS_INPUT,
-  MAX_KWH_INPUT
+  MAX_KWH_INPUT,
+  MAX_PURCHASES_INPUT
 } from './constants.js';
 
 /**
@@ -56,6 +57,6 @@ export const validatePurchases = (count) => {
   const num = Number(count);
   if (isNaN(num)) return { valid: false, error: 'Please enter a number' };
   if (num < 0) return { valid: false, error: 'Must be 0 or more' };
-  if (num > 100) return { valid: false, error: 'Seems too high — double check this value' };
+  if (num > MAX_PURCHASES_INPUT) return { valid: false, error: 'Seems too high — double check this value' };
   return { valid: true, error: null };
 };
