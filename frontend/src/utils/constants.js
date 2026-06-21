@@ -18,4 +18,4 @@ export const MAX_KM_INPUT = 2000;
 export const MAX_MEALS_INPUT = 21;
 export const MAX_KWH_INPUT = 10000;
 export const HISTORY_DAYS = 7;
-export const AI_TIMEOUT_MS = 15000;
+export const AI_TIMEOUT_MS = 60000;
