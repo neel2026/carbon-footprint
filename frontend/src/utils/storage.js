@@ -9,7 +9,7 @@ export const saveEntry = (entry) => {
     const history = getHistory();
     const newHistory = [entry, ...history].slice(0, HISTORY_DAYS);
     localStorage.setItem('carbon_history', JSON.stringify(newHistory));
-  } catch (e) {
+  } catch {
     // Ignore error, localStorage may be blocked
   }
 };
@@ -22,7 +22,7 @@ export const getHistory = () => {
   try {
     const data = localStorage.getItem('carbon_history');
     return data ? JSON.parse(data) : [];
-  } catch (e) {
+  } catch {
     return [];
   }
 };
@@ -35,7 +35,7 @@ export const getProfile = () => {
   try {
     const data = localStorage.getItem('carbon_profile');
     return data ? JSON.parse(data) : null;
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -47,7 +47,7 @@ export const getProfile = () => {
 export const saveProfile = (profile) => {
   try {
     localStorage.setItem('carbon_profile', JSON.stringify(profile));
-  } catch (e) {
+  } catch {
     // silently fail
   }
 };
@@ -58,7 +58,7 @@ export const saveProfile = (profile) => {
 export const clearHistory = () => {
   try {
     localStorage.removeItem('carbon_history');
-  } catch (e) {
+  } catch {
     // silently fail
   }
 };

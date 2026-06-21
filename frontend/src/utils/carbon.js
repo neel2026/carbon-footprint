@@ -1,15 +1,19 @@
 import {
-  KG_CO2_PER_KM_CAR,
-  KG_CO2_PER_KM_BUS,
-  KG_CO2_PER_KM_TRAIN,
-  KG_CO2_PER_KM_BIKE,
-  KG_CO2_PER_BEEF_MEAL,
-  KG_CO2_PER_VEGAN_MEAL,
-  KG_CO2_PER_KWH,
-  KG_CO2_PER_ONLINE_PURCHASE,
-  INDIA_AVERAGE_ANNUAL_KG,
-  WORLD_AVERAGE_ANNUAL_KG
+  KG_CO2_PER_KM_CAR, KG_CO2_PER_KM_BUS, KG_CO2_PER_KM_TRAIN, KG_CO2_PER_KM_BIKE,
+  KG_CO2_PER_BEEF_MEAL, KG_CO2_PER_VEGAN_MEAL, KG_CO2_PER_KWH, KG_CO2_PER_ONLINE_PURCHASE,
+  INDIA_AVERAGE_ANNUAL_KG, WORLD_AVERAGE_ANNUAL_KG
 } from './constants.js';
+
+const getTransport = (km, mode) => {
+  const map = { car: KG_CO2_PER_KM_CAR, bus: KG_CO2_PER_KM_BUS, train: KG_CO2_PER_KM_TRAIN };
+  return km * (map[mode] || KG_CO2_PER_KM_BIKE);
+};
+
+const getDiet = (meals, type) => {
+  if (type === 'vegan') return 21 * KG_CO2_PER_VEGAN_MEAL;
+  if (type === 'vegetarian') return 21 * (KG_CO2_PER_VEGAN_MEAL + 0.1);
+  return (meals * KG_CO2_PER_BEEF_MEAL) + (Math.max(0, 21 - meals) * KG_CO2_PER_VEGAN_MEAL);
+};
 
 /**
  * Calculate total weekly CO2 footprint from user inputs
@@ -17,37 +21,11 @@ import {
  * @returns {Object} - { total, breakdown: { transport, diet, energy, shopping } }
  */
 export const calculateFootprint = (inputs) => {
-  const { transportKm = 0, transportMode = 'car', meatMeals = 0, dietType = 'omnivore', energyKwh = 0, purchases = 0 } = inputs;
-  
-  let transportFactor = 0;
-  if (transportMode === 'car') transportFactor = KG_CO2_PER_KM_CAR;
-  if (transportMode === 'bus') transportFactor = KG_CO2_PER_KM_BUS;
-  if (transportMode === 'train') transportFactor = KG_CO2_PER_KM_TRAIN;
-  if (transportMode === 'bike' || transportMode === 'walk') transportFactor = KG_CO2_PER_KM_BIKE;
-
-  const transport = transportKm * transportFactor;
-
-  let diet = 0;
-  if (dietType === 'vegan') {
-    diet = 21 * KG_CO2_PER_VEGAN_MEAL;
-  } else if (dietType === 'vegetarian') {
-    diet = 21 * (KG_CO2_PER_VEGAN_MEAL + 0.1); // slight bump for dairy
-  } else {
-    // omnivore
-    const nonMeatMeals = Math.max(0, 21 - meatMeals);
-    // Let's assume all meat meals are beef to be safe
-    diet = (meatMeals * KG_CO2_PER_BEEF_MEAL) + (nonMeatMeals * KG_CO2_PER_VEGAN_MEAL);
-  }
-
-  const energy = energyKwh * KG_CO2_PER_KWH;
-  const shopping = purchases * KG_CO2_PER_ONLINE_PURCHASE;
-
-  const total = transport + diet + energy + shopping;
-
-  return {
-    total,
-    breakdown: { transport, diet, energy, shopping }
-  };
+  const transport = getTransport(inputs.transportKm || 0, inputs.transportMode || 'car');
+  const diet = getDiet(inputs.meatMeals || 0, inputs.dietType || 'omnivore');
+  const energy = (inputs.energyKwh || 0) * KG_CO2_PER_KWH;
+  const shopping = (inputs.purchases || 0) * KG_CO2_PER_ONLINE_PURCHASE;
+  return { total: transport + diet + energy + shopping, breakdown: { transport, diet, energy, shopping } };
 };
 
 /**
@@ -59,11 +37,9 @@ export const compareToAverage = (userKgPerWeek) => {
   const userAnnual = userKgPerWeek * 52;
   const vsIndia = userAnnual / INDIA_AVERAGE_ANNUAL_KG;
   const vsWorld = userAnnual / WORLD_AVERAGE_ANNUAL_KG;
-  
   let percentile = 'Average';
   if (vsIndia > 1.5) percentile = 'High';
   if (vsIndia < 0.5) percentile = 'Low';
-
   return { vsIndia, vsWorld, percentile };
 };
 
@@ -74,12 +50,9 @@ export const compareToAverage = (userKgPerWeek) => {
  */
 export const getHighestImpactCategory = (breakdown) => {
   let highest = 'transport';
-  let max = breakdown.transport;
-
-  if (breakdown.diet > max) { highest = 'diet'; max = breakdown.diet; }
-  if (breakdown.energy > max) { highest = 'energy'; max = breakdown.energy; }
-  if (breakdown.shopping > max) { highest = 'shopping'; max = breakdown.shopping; }
-
+  if (breakdown.diet > breakdown[highest]) highest = 'diet';
+  if (breakdown.energy > breakdown[highest]) highest = 'energy';
+  if (breakdown.shopping > breakdown[highest]) highest = 'shopping';
   return highest;
 };
 
@@ -88,8 +61,16 @@ export const getHighestImpactCategory = (breakdown) => {
  * @param {number} kg
  * @returns {string} - "12.3 kg CO₂"
  */
-export const formatCO2 = (kg) => {
-  return `${Number(kg).toFixed(1)} kg CO₂`;
+export const formatCO2 = (kg) => `${Number(kg).toFixed(1)} kg CO₂`;
+
+const getStreakFromSorted = (sorted, startExpected) => {
+  let streak = 0, expected = startExpected;
+  for (const entry of sorted) {
+    const t = new Date(entry.date).setHours(0, 0, 0, 0);
+    if (t === expected) { streak++; expected -= 86400000; }
+    else if (t < expected) break;
+  }
+  return streak;
 };
 
 /**
@@ -98,37 +79,12 @@ export const formatCO2 = (kg) => {
  * @returns {number} - current streak in days
  */
 export const calculateStreak = (entries) => {
-  if (!entries || entries.length === 0) return 0;
-  
-  let streak = 0;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
+  if (!entries || !entries.length) return 0;
   const sorted = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
-  let expectedDate = today.getTime();
-  const mostRecentTime = new Date(sorted[0].date).setHours(0, 0, 0, 0);
-  const oneDay = 24 * 60 * 60 * 1000;
-
-  if (mostRecentTime !== expectedDate && mostRecentTime !== expectedDate - oneDay) {
-    return 0; // Streak broken
-  }
-
-  if (mostRecentTime === expectedDate - oneDay) {
-    expectedDate -= oneDay; // Streak starts from yesterday
-  }
-
-  for (const entry of sorted) {
-    const entryTime = new Date(entry.date).setHours(0, 0, 0, 0);
-    if (entryTime === expectedDate) {
-      streak++;
-      expectedDate -= oneDay;
-    } else if (entryTime < expectedDate) {
-      break; // Gap found
-    }
-  }
-
-  return streak;
+  const today = new Date().setHours(0, 0, 0, 0);
+  const mostRecent = new Date(sorted[0].date).setHours(0, 0, 0, 0);
+  if (mostRecent !== today && mostRecent !== today - 86400000) return 0;
+  return getStreakFromSorted(sorted, mostRecent === today ? today : today - 86400000);
 };
 
 /**
@@ -139,11 +95,7 @@ export const calculateStreak = (entries) => {
 export const calculateTrend = (entries) => {
   if (!entries || entries.length < 2) return 0;
   const sorted = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  
-  const current = sorted[0].total;
-  const previous = sorted[1].total;
-  
-  if (previous === 0) return current > 0 ? 100 : 0;
-  
-  return ((current - previous) / previous) * 100;
+  const cur = sorted[0].total, prev = sorted[1].total;
+  if (prev === 0) return cur > 0 ? 100 : 0;
+  return ((cur - prev) / prev) * 100;
 };

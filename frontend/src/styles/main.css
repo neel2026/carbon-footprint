@@ -303,6 +303,15 @@ body {
   }
 }
 
+.fade-in {
+  animation: slideIn 0.8s ease-out forwards;
+  opacity: 0;
+}
+
+.delay-1 {
+  animation-delay: 0.4s;
+}
+
 /* AI Insight */
 .ai-insight {
   background: var(--color-surface);
