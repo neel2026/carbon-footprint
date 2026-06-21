@@ -88,6 +88,7 @@ describe('Integration: Submit -> Calculate -> AI -> Response', () => {
     });
     
     const data = await res.json();
+    
     assert.strictEqual(res.status, 200, `API should return 200 OK, got ${res.status}: ${JSON.stringify(data)}`);
     
     // Complete Schema Validation of the response

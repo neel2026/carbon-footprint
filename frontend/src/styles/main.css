@@ -314,6 +314,16 @@ body {
 }
 
 .fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.form-item-1 { animation-delay: 0s; }
+.form-item-2 { animation-delay: 0.1s; }
+.form-item-3 { animation-delay: 0.2s; }
+.form-item-4 { animation-delay: 0.3s; }
+
+.fade-in {
   animation: slideIn 0.8s ease-out forwards;
   opacity: 0;
   will-change: transform, opacity;

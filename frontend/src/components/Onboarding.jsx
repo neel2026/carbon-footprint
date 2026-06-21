@@ -10,8 +10,7 @@ const Onboarding = memo(({ onComplete }) => {
     name: '',
     country: 'India',
     transportMode: 'car',
-    dietType: 'omnivore',
-    homeSize: 'medium'
+    dietType: 'omnivore'
   });
 
   const handleChange = useCallback((e) => {
@@ -65,14 +64,6 @@ const Onboarding = memo(({ onComplete }) => {
             <option value="omnivore">Omnivore (Meat & Plants)</option>
             <option value="vegetarian">Vegetarian</option>
             <option value="vegan">Vegan</option>
-          </select>
-        </div>
-        <div className="form-group">
-          <label htmlFor="homeSize">Home size?</label>
-          <select id="homeSize" name="homeSize" value={profile.homeSize} onChange={handleChange} className="onboarding-select">
-            <option value="small">Small (Apartment)</option>
-            <option value="medium">Medium (House)</option>
-            <option value="large">Large (Villa/Big House)</option>
           </select>
         </div>
         <button type="submit" className="onboarding-submit-btn">Continue</button>

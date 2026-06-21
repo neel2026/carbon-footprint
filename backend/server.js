@@ -58,7 +58,6 @@ const validateInput = (body) => {
   if (!isValidString(profile.country, ['India', 'USA', 'UK', 'Other'])) return 'Invalid country';
   if (!isValidString(profile.transportMode, ['car', 'bus', 'train', 'bike'])) return 'Invalid transportMode';
   if (!isValidString(profile.dietType, ['omnivore', 'vegetarian', 'vegan'])) return 'Invalid dietType';
-  if (profile.homeSize !== undefined && !isValidString(profile.homeSize, ['small', 'medium', 'large'])) return 'Invalid homeSize';
 
   const inputs = currentEntry.inputs;
   if (!inputs) return 'Missing currentEntry.inputs';
@@ -95,7 +94,7 @@ app.post('/api/insight', async (req, res) => {
     }
 
     const { profile, currentEntry, history } = req.body;
-    const normalizedProfile = { ...profile, homeSize: profile.homeSize || 'medium' };
+    const normalizedProfile = { ...profile };
     const { total, breakdown } = calculateFootprint(currentEntry.inputs, normalizedProfile);
     const highestImpactCategory = getHighestImpactCategory(breakdown);
 
@@ -178,7 +177,7 @@ Rules:
     }
 
     res.json(insight);
-  } catch {
+  } catch (error) {
     res.status(500).json({ error: 'Unable to generate insight. Please try again.' });
   }
 });
