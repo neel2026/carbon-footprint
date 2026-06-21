@@ -8,7 +8,7 @@ describe('fetchWithTimeout', () => {
   });
 
   test('returns data on successful fetch', async () => {
-    global.fetch = mock.fn(async () => ({
+    globalThis.fetch = mock.fn(async () => ({
       ok: true,
       json: async () => ({ success: true })
     }));
@@ -19,7 +19,7 @@ describe('fetchWithTimeout', () => {
   });
 
   test('returns error on HTTP failure', async () => {
-    global.fetch = mock.fn(async () => ({
+    globalThis.fetch = mock.fn(async () => ({
       ok: false,
       status: 500
     }));
@@ -30,7 +30,7 @@ describe('fetchWithTimeout', () => {
   });
 
   test('returns timeout error when aborted', async () => {
-    global.fetch = mock.fn(async (_, { signal }) => {
+    globalThis.fetch = mock.fn(async (_, { signal }) => {
       return new Promise((_, reject) => {
         const error = new Error('The operation was aborted');
         error.name = 'AbortError';
@@ -47,7 +47,7 @@ describe('fetchWithTimeout', () => {
   });
 
   test('returns generic error on network failure', async () => {
-    global.fetch = mock.fn(async () => {
+    globalThis.fetch = mock.fn(async () => {
       throw new Error('Network error');
     });
 

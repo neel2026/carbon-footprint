@@ -7,7 +7,7 @@ describe('storage.js', () => {
 
   beforeEach(() => {
     mockStorage = {};
-    global.localStorage = {
+    globalThis.localStorage = {
       getItem: (key) => mockStorage[key] || null,
       setItem: (key, value) => { mockStorage[key] = String(value); },
       removeItem: (key) => { delete mockStorage[key]; }
@@ -15,7 +15,7 @@ describe('storage.js', () => {
   });
 
   afterEach(() => {
-    delete global.localStorage;
+    delete globalThis.localStorage;
   });
 
   test('getProfile returns null when empty', () => {
@@ -56,17 +56,17 @@ describe('storage.js', () => {
   });
 
   test('getHistory handles corrupted JSON gracefully', () => {
-    global.localStorage.setItem('carbon_history', '{corrupted_json');
+    globalThis.localStorage.setItem('carbon_history', '{corrupted_json');
     assert.deepEqual(getHistory(), []);
   });
 
   test('getProfile handles corrupted JSON gracefully', () => {
-    global.localStorage.setItem('carbon_profile', '{corrupted_json');
+    globalThis.localStorage.setItem('carbon_profile', '{corrupted_json');
     assert.strictEqual(getProfile(), null);
   });
 
   test('saveEntry handles localStorage quota exceeded error gracefully', () => {
-    global.localStorage.setItem = () => { throw new Error('QuotaExceededError'); };
+    globalThis.localStorage.setItem = () => { throw new Error('QuotaExceededError'); };
     assert.doesNotThrow(() => saveEntry({ total: 10 }));
   });
 });

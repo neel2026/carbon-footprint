@@ -81,7 +81,7 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
             className={`footprint-form__input ${errors.transportKm ? 'footprint-form__input--error' : ''}`}
             disabled={isLoading}
             min="0"
-            max="10000"
+            max="2000"
             step="1"
             aria-invalid={!!errors.transportKm}
             aria-describedby={errors.transportKm ? 'transportKm-error' : undefined}
@@ -89,9 +89,12 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
           {errors.transportKm && <span id="transportKm-error" className="footprint-form__error" role="alert">{errors.transportKm}</span>}
         </div>
 
-        {profile.dietType === 'omnivore' && (
-          <div className="footprint-form__group">
-            <label htmlFor="meatMeals" className="footprint-form__label">Meat meals this week</label>
+        {profile.dietType !== 'vegan' && profile.dietType !== 'vegetarian' && (
+          <div className="form-group footprint-form__group fade-in" style={{ animationDelay: '0.1s' }}>
+            <label htmlFor="meatMeals">
+              Meat-based meals
+              <span className="form-label-hint">This week (max 21)</span>
+            </label>
             <input
               type="number"
               id="meatMeals"
@@ -101,7 +104,7 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
               className={`footprint-form__input ${errors.meatMeals ? 'footprint-form__input--error' : ''}`}
               disabled={isLoading}
               min="0"
-              max="100"
+              max="21"
               step="1"
               aria-invalid={!!errors.meatMeals}
               aria-describedby={errors.meatMeals ? 'meatMeals-error' : undefined}
@@ -110,8 +113,11 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
           </div>
         )}
 
-        <div className="footprint-form__group">
-          <label htmlFor="energyKwh" className="footprint-form__label">Home energy used (kWh)</label>
+        <div className="form-group footprint-form__group fade-in" style={{ animationDelay: '0.2s' }}>
+          <label htmlFor="energyKwh">
+            Electricity usage
+            <span className="form-label-hint">kWh this week</span>
+          </label>
           <input
             type="number"
             id="energyKwh"
@@ -121,7 +127,7 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
             className={`footprint-form__input ${errors.energyKwh ? 'footprint-form__input--error' : ''}`}
             disabled={isLoading}
             min="0"
-            max="100000"
+            max="10000"
             step="1"
             aria-invalid={!!errors.energyKwh}
             aria-describedby={errors.energyKwh ? 'energyKwh-error' : undefined}
@@ -129,8 +135,11 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
           {errors.energyKwh && <span id="energyKwh-error" className="footprint-form__error" role="alert">{errors.energyKwh}</span>}
         </div>
 
-        <div className="footprint-form__group">
-          <label htmlFor="purchases" className="footprint-form__label">Online deliveries received</label>
+        <div className="form-group footprint-form__group fade-in" style={{ animationDelay: '0.3s' }}>
+          <label htmlFor="purchases">
+            Online purchases
+            <span className="form-label-hint">Deliveries this week</span>
+          </label>
           <input
             type="number"
             id="purchases"
@@ -140,7 +149,7 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
             className={`footprint-form__input ${errors.purchases ? 'footprint-form__input--error' : ''}`}
             disabled={isLoading}
             min="0"
-            max="1000"
+            max="100"
             step="1"
             aria-invalid={!!errors.purchases}
             aria-describedby={errors.purchases ? 'purchases-error' : undefined}

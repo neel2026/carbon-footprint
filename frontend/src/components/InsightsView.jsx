@@ -1,6 +1,7 @@
-import { memo } from 'react';
+import React, { memo, Suspense } from 'react';
 import PropTypes from 'prop-types';
-import FootprintChart from './FootprintChart';
+const FootprintChart = React.lazy(() => import('./FootprintChart'));
+import { getHighestImpactCategory, compareToAverage } from '../utils/carbon';
 import ActionCard from './ActionCard';
 import AIInsight from './AIInsight';
 
@@ -16,10 +17,12 @@ export const InsightsView = memo(({ insight, handleBack }) => (
       <button onClick={handleBack} className="btn-secondary" type="button">Log another entry</button>
     </div>
     <div className="insights-content">
-      <FootprintChart breakdown={insight.currentEntry.breakdown} total={insight.currentEntry.total} />
+      <Suspense fallback={<div className="footprint-chart footprint-chart--loading">Loading chart...</div>}>
+        <FootprintChart breakdown={insight.currentEntry.breakdown} total={insight.currentEntry.total} />
+      </Suspense>
       <div className="insights-view__comparison">
         <p>You are using <strong>{insight.currentEntry.total.toFixed(1)} kg CO₂</strong>.</p>
-        <p>This is <strong>{insight.highestImpactCategory}</strong>-heavy compared to average.</p>
+        <p>This is <strong>{getHighestImpactCategory(insight.currentEntry.breakdown)}</strong>-heavy, which is <strong>{compareToAverage(insight.currentEntry.total).percentile.toLowerCase()}</strong> compared to the average.</p>
       </div>
       <ActionCard 
         action={insight.action} 

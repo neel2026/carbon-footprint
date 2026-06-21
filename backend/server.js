@@ -26,7 +26,7 @@ app.use(cors({
 
 // Enforce Content-Type for POST requests
 app.use((req, res, next) => {
-  if (req.method === 'POST' && req.headers['content-type'] !== 'application/json') {
+  if (req.method === 'POST' && !req.headers['content-type']?.includes('application/json')) {
     return res.status(415).json({ error: 'Content-Type must be application/json' });
   }
   next();
@@ -65,10 +65,10 @@ const validateInput = (body) => {
   const inputs = currentEntry.inputs;
   if (!inputs) return 'Missing currentEntry.inputs';
   
-  if (!isValidNumber(inputs.transportKm, 0, 10000)) return 'Invalid transportKm';
-  if (inputs.meatMeals !== undefined && !isValidNumber(inputs.meatMeals, 0, 100)) return 'Invalid meatMeals';
-  if (!isValidNumber(inputs.energyKwh, 0, 100000)) return 'Invalid energyKwh';
-  if (!isValidNumber(inputs.purchases, 0, 1000)) return 'Invalid purchases';
+  if (!isValidNumber(inputs.transportKm, 0, 2000)) return 'Invalid transportKm';
+  if (inputs.meatMeals !== undefined && !isValidNumber(inputs.meatMeals, 0, 21)) return 'Invalid meatMeals';
+  if (!isValidNumber(inputs.energyKwh, 0, 10000)) return 'Invalid energyKwh';
+  if (!isValidNumber(inputs.purchases, 0, 100)) return 'Invalid purchases';
 
   for (const key of ['transport', 'diet', 'energy', 'shopping']) {
     if (!isValidNumber(breakdown[key], 0, 1000000)) return `Invalid breakdown.${key}`;
@@ -98,14 +98,17 @@ app.post('/api/insight', async (req, res) => {
 
     const { profile, currentEntry, history, breakdown, highestImpactCategory } = req.body;
 
+    // Sanitize profile name (strip HTML/special chars)
+    const sanitizedName = profile.name.replace(/[^a-zA-Z0-9 ]/g, '').trim().substring(0, 50);
+
     // Sanitize history to just recent trends to save tokens and prevent injection
     const sanitizedHistory = (history || []).slice(0, 7).map(h => ({
-      date: h.date,
+      date: String(h.date).replace(/[^0-9T:Z.-]/g, '').substring(0, 30),
       total: typeof h.total === 'number' ? Number(h.total.toFixed(2)) : 0
     }));
 
     const promptData = JSON.stringify({ 
-      profile, 
+      profile: { ...profile, name: sanitizedName }, 
       actualInputs: currentEntry.inputs,
       breakdown, 
       highestImpactCategory,
@@ -155,27 +158,30 @@ Rules:
     try {
       insight = JSON.parse(jsonStr);
     } catch (e) {
-      console.error("Failed to parse AI JSON:", rawContent);
       return res.status(502).json({ error: 'AI returned invalid data format' });
     }
 
-    // Validate AI schema
-    const requiredAIKeys = ['recommendation', 'action', 'estimatedSavingKg', 'savingExplanation', 'category', 'difficulty'];
-    for (const k of requiredAIKeys) {
-      if (!(k in insight)) {
-        console.error("Missing key in AI response:", k);
-        return res.status(502).json({ error: 'AI response missing required fields' });
-      }
+    // Deep validation of AI schema
+    if (
+      typeof insight.recommendation !== 'string' || insight.recommendation.length > 500 ||
+      typeof insight.action !== 'string' || insight.action.length > 200 ||
+      typeof insight.estimatedSavingKg !== 'number' || insight.estimatedSavingKg < 0 ||
+      typeof insight.savingExplanation !== 'string' || insight.savingExplanation.length > 200 ||
+      !['diet', 'transport', 'energy', 'shopping'].includes(insight.category) ||
+      !['easy', 'medium', 'hard'].includes(insight.difficulty) ||
+      typeof insight.timeToImpact !== 'string' || insight.timeToImpact.length > 50
+    ) {
+      return res.status(502).json({ error: 'AI response missing or invalid fields' });
     }
 
     res.json(insight);
   } catch (error) {
-    console.error("Insight generation error:", error);
+    console.error("DEBUG ERROR:", error);
     res.status(500).json({ error: 'Unable to generate insight. Please try again.' });
   }
 });
 
-if (process.env.NODE_ENV !== 'production' && process.env.npm_lifecycle_event !== 'test') {
+if (process.env.NODE_ENV !== 'production' && process.env.NODE_ENV !== 'test') {
   app.listen(port);
 }
 

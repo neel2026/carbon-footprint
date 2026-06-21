@@ -6,11 +6,23 @@ import {
   WEEKS_PER_YEAR, MS_PER_DAY, MEALS_PER_WEEK
 } from './constants.js';
 
+/**
+ * Calculate transport emissions
+ * @param {number} km - Distance traveled
+ * @param {string} mode - Transport mode (car, bus, train, bike)
+ * @returns {number} Emissions in kg CO2
+ */
 const getTransport = (km, mode) => {
   const map = { car: KG_CO2_PER_KM_CAR, bus: KG_CO2_PER_KM_BUS, train: KG_CO2_PER_KM_TRAIN };
   return km * (map[mode] || KG_CO2_PER_KM_BIKE);
 };
 
+/**
+ * Calculate diet emissions
+ * @param {number} meatMeals - Number of meat meals per week
+ * @param {string} type - Diet type (omnivore, vegetarian, vegan)
+ * @returns {number} Emissions in kg CO2
+ */
 const getDiet = (meatMeals, type) => {
   if (type === 'vegan') return MEALS_PER_WEEK * KG_CO2_PER_VEGAN_MEAL;
   if (type === 'vegetarian') return MEALS_PER_WEEK * KG_CO2_PER_VEGETARIAN_MEAL;
@@ -18,6 +30,12 @@ const getDiet = (meatMeals, type) => {
   return (meatMeals * KG_CO2_PER_MEAT_MEAL) + (plantMeals * KG_CO2_PER_VEGETARIAN_MEAL);
 };
 
+/**
+ * Calculate total weekly CO2 footprint from user inputs
+ * @param {Object} inputs - { transportKm, transportMode, meatMeals, dietType, energyKwh, purchases }
+ * @param {Object} [profile={}] - User profile for country and default settings
+ * @returns {Object} - { total, breakdown: { transport, diet, energy, shopping } }
+ */
 export const calculateFootprint = (inputs, profile = {}) => {
   const transport = getTransport(inputs.transportKm || 0, profile.transportMode || inputs.transportMode || 'car');
   const diet = getDiet(inputs.meatMeals || 0, profile.dietType || inputs.dietType || 'omnivore');
@@ -28,6 +46,11 @@ export const calculateFootprint = (inputs, profile = {}) => {
   return { total: transport + diet + energy + shopping, breakdown: { transport, diet, energy, shopping } };
 };
 
+/**
+ * Compare user footprint to India/World average
+ * @param {number} userKgPerWeek - Weekly emissions in kg
+ * @returns {Object} - { vsIndia: number, vsWorld: number, percentile: string }
+ */
 export const compareToAverage = (userKgPerWeek) => {
   const userAnnual = userKgPerWeek * WEEKS_PER_YEAR;
   const vsIndia = userAnnual / INDIA_AVERAGE_ANNUAL_KG;

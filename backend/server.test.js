@@ -1,13 +1,12 @@
 process.env.NODE_ENV = 'test';
 import { test, describe, before, after } from 'node:test';
 import { strict as assert } from 'node:assert';
-import app from './server.js';
-
 let server;
 let baseUrl;
 
 describe('Backend API Tests', () => {
-  before(() => {
+  before(async () => {
+    const { default: app } = await import('./server.js');
     return new Promise((resolve) => {
       server = app.listen(0, () => {
         baseUrl = `http://localhost:${server.address().port}`;

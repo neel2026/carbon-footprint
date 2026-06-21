@@ -2,8 +2,8 @@ import { useState, useRef, useCallback } from 'react';
 import { calculateFootprint, getHighestImpactCategory } from '../utils/carbon.js';
 import { fetchWithTimeout } from '../utils/api.js';
 
-const buildEntry = (inputs) => {
-  const { total, breakdown } = calculateFootprint(inputs);
+const buildEntry = (inputs, profile) => {
+  const { total, breakdown } = calculateFootprint(inputs, profile);
   return { date: new Date().toISOString(), inputs, total, breakdown };
 };
 
@@ -29,7 +29,7 @@ export const useFootprint = () => {
     if (pendingRef.current) return { success: false, entry: null, error: 'Already submitting' };
     pendingRef.current = true;
     setIsLoading(true); setError(null); setInsight(null);
-    const entry = buildEntry(inputs);
+    const entry = buildEntry(inputs, profile);
     const { data, error: err } = await fetchWithTimeout('/api/insight', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ profile, currentEntry: entry, history, breakdown: entry.breakdown, highestImpactCategory: getHighestImpactCategory(entry.breakdown) })
