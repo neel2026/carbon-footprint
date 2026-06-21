@@ -10,9 +10,18 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Middlewares
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'https://carbon-tracker-rust.vercel.app'
+];
+
 app.use(helmet());
-app.use(cors({ origin: 'http://localhost:5173' }));
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) return cb(null, true);
+    cb(new Error('Not allowed by CORS'));
+  }
+}));
 app.use(express.json({ limit: '10kb' }));
 
 // Rate Limiter: 10 requests per 15 minutes per IP
@@ -89,16 +98,13 @@ Rules:
     const insight = JSON.parse(jsonStr);
 
     res.json(insight);
-  } catch (error) {
-    console.error("AI Insight Error:", error);
-    res.status(500).json({ error: error.message || 'Something went wrong. Please try again.' });
+  } catch {
+    res.status(500).json({ error: 'Unable to generate insight. Please try again.' });
   }
 });
 
 if (process.env.NODE_ENV !== 'production') {
-  app.listen(port, () => {
-    console.log(`Local server listening on port ${port}`);
-  });
+  app.listen(port);
 }
 
 export default app;

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { calculateFootprint, getHighestImpactCategory } from '../utils/carbon.js';
 import { fetchWithTimeout } from '../utils/api.js';
 
@@ -23,8 +23,11 @@ export const useFootprint = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [insight, setInsight] = useState(null);
+  const pendingRef = useRef(false);
 
   const submitFootprint = async (profile, inputs, history) => {
+    if (pendingRef.current) return { success: false, entry: null, error: 'Already submitting' };
+    pendingRef.current = true;
     setIsLoading(true); setError(null); setInsight(null);
     const entry = buildEntry(inputs);
     const { data, error: err } = await fetchWithTimeout('/api/insight', {
@@ -32,6 +35,7 @@ export const useFootprint = () => {
       body: JSON.stringify({ profile, currentEntry: entry, history, breakdown: entry.breakdown, highestImpactCategory: getHighestImpactCategory(entry.breakdown) })
     });
     setIsLoading(false);
+    pendingRef.current = false;
     return processInsightResult(data, err, entry, setError, setInsight);
   };
 

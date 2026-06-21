@@ -1,4 +1,8 @@
 {
+  "type": "module",
+  "scripts": {
+    "test": "node --test carbon.test.js"
+  },
   "devDependencies": {
     "vercel": "^54.14.5"
   }
