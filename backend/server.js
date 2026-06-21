@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { GoogleGenAI } from '@google/genai';
+import { calculateFootprint, getHighestImpactCategory } from '../frontend/src/utils/carbon.js';
 
 dotenv.config();
 
@@ -43,36 +44,29 @@ const apiLimiter = rateLimit({
 
 app.use('/api/', apiLimiter);
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY || 'dummy_key',
-});
-
 // Helper for type checking and limits
 const isValidNumber = (val, min, max) => typeof val === 'number' && isFinite(val) && val >= min && val <= max;
 const isValidString = (val, allowedValues) => typeof val === 'string' && allowedValues.includes(val);
+const isValidCount = (val, min, max) => isValidNumber(val, min, max) && Number.isInteger(val);
 
 const validateInput = (body) => {
-  const { profile, currentEntry, history, breakdown, highestImpactCategory } = body;
+  const { profile, currentEntry, history } = body;
 
-  if (!profile || !currentEntry || !breakdown || !highestImpactCategory) return 'Missing required top-level fields';
-  if (!isValidString(highestImpactCategory, ['transport', 'diet', 'energy', 'shopping'])) return 'Invalid highestImpactCategory';
+  if (!profile || !currentEntry) return 'Missing required top-level fields';
 
   if (!profile.name || typeof profile.name !== 'string' || profile.name.length > 50) return 'Invalid profile name';
   if (!isValidString(profile.country, ['India', 'USA', 'UK', 'Other'])) return 'Invalid country';
   if (!isValidString(profile.transportMode, ['car', 'bus', 'train', 'bike'])) return 'Invalid transportMode';
   if (!isValidString(profile.dietType, ['omnivore', 'vegetarian', 'vegan'])) return 'Invalid dietType';
+  if (profile.homeSize !== undefined && !isValidString(profile.homeSize, ['small', 'medium', 'large'])) return 'Invalid homeSize';
 
   const inputs = currentEntry.inputs;
   if (!inputs) return 'Missing currentEntry.inputs';
   
   if (!isValidNumber(inputs.transportKm, 0, 2000)) return 'Invalid transportKm';
-  if (inputs.meatMeals !== undefined && !isValidNumber(inputs.meatMeals, 0, 21)) return 'Invalid meatMeals';
+  if (inputs.meatMeals !== undefined && !isValidCount(inputs.meatMeals, 0, 21)) return 'Invalid meatMeals';
   if (!isValidNumber(inputs.energyKwh, 0, 10000)) return 'Invalid energyKwh';
-  if (!isValidNumber(inputs.purchases, 0, 100)) return 'Invalid purchases';
-
-  for (const key of ['transport', 'diet', 'energy', 'shopping']) {
-    if (!isValidNumber(breakdown[key], 0, 1000000)) return `Invalid breakdown.${key}`;
-  }
+  if (!isValidCount(inputs.purchases, 0, 100)) return 'Invalid purchases';
 
   if (history && !Array.isArray(history)) return 'History must be an array';
 
@@ -96,7 +90,14 @@ app.post('/api/insight', async (req, res) => {
       return res.status(400).json({ error: errorMsg });
     }
 
-    const { profile, currentEntry, history, breakdown, highestImpactCategory } = req.body;
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: 'AI insights are temporarily unavailable.' });
+    }
+
+    const { profile, currentEntry, history } = req.body;
+    const normalizedProfile = { ...profile, homeSize: profile.homeSize || 'medium' };
+    const { total, breakdown } = calculateFootprint(currentEntry.inputs, normalizedProfile);
+    const highestImpactCategory = getHighestImpactCategory(breakdown);
 
     // Sanitize profile name (strip HTML/special chars)
     const sanitizedName = profile.name.replace(/[^a-zA-Z0-9 ]/g, '').trim().substring(0, 50);
@@ -108,8 +109,9 @@ app.post('/api/insight', async (req, res) => {
     }));
 
     const promptData = JSON.stringify({ 
-      profile: { ...profile, name: sanitizedName }, 
+      profile: { ...normalizedProfile, name: sanitizedName },
       actualInputs: currentEntry.inputs,
+      calculatedTotal: Number(total.toFixed(2)),
       breakdown, 
       highestImpactCategory,
       recentHistory: sanitizedHistory
@@ -143,6 +145,7 @@ Rules:
 - estimatedSavingKg must be a realistic number you can back up
 - Return ONLY valid JSON. No exceptions.`;
 
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: `User data: ${promptData}`,
@@ -157,7 +160,7 @@ Rules:
     let insight;
     try {
       insight = JSON.parse(jsonStr);
-    } catch (e) {
+    } catch {
       return res.status(502).json({ error: 'AI returned invalid data format' });
     }
 
@@ -175,8 +178,7 @@ Rules:
     }
 
     res.json(insight);
-  } catch (error) {
-    console.error("DEBUG ERROR:", error);
+  } catch {
     res.status(500).json({ error: 'Unable to generate insight. Please try again.' });
   }
 });

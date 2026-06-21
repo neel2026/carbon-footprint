@@ -86,4 +86,45 @@ describe('Backend API Tests', () => {
     const data = await res.json();
     assert.strictEqual(data.error, 'Invalid country');
   });
+
+  test('POST /api/insight accepts JSON content type with charset', async () => {
+    const res = await fetch(`${baseUrl}/api/insight`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json; charset=utf-8' },
+      body: JSON.stringify({})
+    });
+
+    assert.strictEqual(res.status, 400);
+  });
+
+  test('POST /api/insight reports unavailable AI configuration', async () => {
+    const payload = {
+      profile: {
+        name: 'Test',
+        country: 'India',
+        transportMode: 'car',
+        dietType: 'omnivore',
+        homeSize: 'medium'
+      },
+      currentEntry: {
+        inputs: {
+          transportKm: 50,
+          meatMeals: 5,
+          energyKwh: 50,
+          purchases: 2
+        }
+      },
+      history: []
+    };
+
+    const res = await fetch(`${baseUrl}/api/insight`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    assert.strictEqual(res.status, 503);
+    const data = await res.json();
+    assert.strictEqual(data.error, 'AI insights are temporarily unavailable.');
+  });
 });

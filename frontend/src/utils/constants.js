@@ -18,6 +18,12 @@ export const KG_CO2_PER_KWH_MAP = {
 export const KG_CO2_PER_ONLINE_PURCHASE = 4.5;
 export const INDIA_AVERAGE_ANNUAL_KG = 1900;
 export const WORLD_AVERAGE_ANNUAL_KG = 4000;
+export const COUNTRY_AVERAGE_ANNUAL_KG = {
+  India: INDIA_AVERAGE_ANNUAL_KG,
+  USA: 14900,
+  UK: 4700,
+  Other: WORLD_AVERAGE_ANNUAL_KG
+};
 
 export const CHART_INNER_RADIUS = 60;
 export const CHART_OUTER_RADIUS = 80;

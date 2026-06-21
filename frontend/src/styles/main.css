@@ -320,7 +320,15 @@ body {
 }
 
 .delay-1 {
-  animation-delay: 0.4s;
+  animation-delay: 0.1s;
+}
+
+.delay-2 {
+  animation-delay: 0.2s;
+}
+
+.delay-3 {
+  animation-delay: 0.3s;
 }
 
 /* Accessibility Focus & Skip Link */

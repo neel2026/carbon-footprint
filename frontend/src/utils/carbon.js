@@ -2,7 +2,7 @@ import {
   KG_CO2_PER_KM_CAR, KG_CO2_PER_KM_BUS, KG_CO2_PER_KM_TRAIN, KG_CO2_PER_KM_BIKE,
   KG_CO2_PER_MEAT_MEAL, KG_CO2_PER_VEGETARIAN_MEAL, KG_CO2_PER_VEGAN_MEAL, 
   KG_CO2_PER_KWH_MAP, KG_CO2_PER_ONLINE_PURCHASE,
-  INDIA_AVERAGE_ANNUAL_KG, WORLD_AVERAGE_ANNUAL_KG,
+  INDIA_AVERAGE_ANNUAL_KG, WORLD_AVERAGE_ANNUAL_KG, COUNTRY_AVERAGE_ANNUAL_KG,
   WEEKS_PER_YEAR, MS_PER_DAY, MEALS_PER_WEEK
 } from './constants.js';
 
@@ -47,20 +47,28 @@ export const calculateFootprint = (inputs, profile = {}) => {
 };
 
 /**
- * Compare user footprint to India/World average
+ * Compare a weekly footprint to country and world annual averages
  * @param {number} userKgPerWeek - Weekly emissions in kg
- * @returns {Object} - { vsIndia: number, vsWorld: number, percentile: string }
+ * @param {string} [country='India'] - Country used for the local comparison
+ * @returns {Object} Comparison ratios and a low/average/high classification
  */
-export const compareToAverage = (userKgPerWeek) => {
+export const compareToAverage = (userKgPerWeek, country = 'India') => {
   const userAnnual = userKgPerWeek * WEEKS_PER_YEAR;
   const vsIndia = userAnnual / INDIA_AVERAGE_ANNUAL_KG;
   const vsWorld = userAnnual / WORLD_AVERAGE_ANNUAL_KG;
+  const countryAverage = COUNTRY_AVERAGE_ANNUAL_KG[country] || COUNTRY_AVERAGE_ANNUAL_KG.Other;
+  const vsCountry = userAnnual / countryAverage;
   let percentile = 'Average';
-  if (vsIndia > 1.5) percentile = 'High';
-  if (vsIndia < 0.5) percentile = 'Low';
-  return { vsIndia, vsWorld, percentile };
+  if (vsCountry > 1.5) percentile = 'High';
+  if (vsCountry < 0.5) percentile = 'Low';
+  return { vsCountry, vsIndia, vsWorld, percentile };
 };
 
+/**
+ * Find the category with the largest calculated footprint.
+ * @param {Object} breakdown - Category emissions
+ * @returns {string} Dominant category name
+ */
 export const getHighestImpactCategory = (breakdown) => {
   let highest = 'transport';
   if (breakdown.diet > breakdown[highest]) highest = 'diet';
@@ -69,6 +77,11 @@ export const getHighestImpactCategory = (breakdown) => {
   return highest;
 };
 
+/**
+ * Format carbon emissions for display.
+ * @param {number|string} kg - Emissions in kilograms
+ * @returns {string} Formatted value with unit
+ */
 export const formatCO2 = (kg) => `${Number(kg).toFixed(1)} kg CO₂`;
 
 const getStreakFromSorted = (sorted, startExpected) => {
@@ -81,6 +94,11 @@ const getStreakFromSorted = (sorted, startExpected) => {
   return streak;
 };
 
+/**
+ * Calculate the current daily logging streak.
+ * @param {Array} entries - History entries with ISO dates
+ * @returns {number} Consecutive day count
+ */
 export const calculateStreak = (entries) => {
   if (!entries || !entries.length) return 0;
   const sorted = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -90,6 +108,11 @@ export const calculateStreak = (entries) => {
   return getStreakFromSorted(sorted, mostRecent === today ? today : today - MS_PER_DAY);
 };
 
+/**
+ * Calculate change between the two most recent entries.
+ * @param {Array} entries - History entries with totals
+ * @returns {number} Percentage change, where negative means improvement
+ */
 export const calculateTrend = (entries) => {
   if (!entries || entries.length < 2) return 0;
   const sorted = [...entries].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

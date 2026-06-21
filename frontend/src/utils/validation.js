@@ -29,6 +29,7 @@ export const validateMeals = (meals) => {
   const num = Number(meals);
   if (isNaN(num)) return { valid: false, error: 'Please enter a number' };
   if (num < 0) return { valid: false, error: 'Must be 0 or more' };
+  if (!Number.isInteger(num)) return { valid: false, error: 'Please enter a whole number' };
   if (num > MAX_MEALS_INPUT) return { valid: false, error: 'Seems too high — double check this value' };
   return { valid: true, error: null };
 };
@@ -57,6 +58,7 @@ export const validatePurchases = (count) => {
   const num = Number(count);
   if (isNaN(num)) return { valid: false, error: 'Please enter a number' };
   if (num < 0) return { valid: false, error: 'Must be 0 or more' };
+  if (!Number.isInteger(num)) return { valid: false, error: 'Please enter a whole number' };
   if (num > MAX_PURCHASES_INPUT) return { valid: false, error: 'Seems too high — double check this value' };
   return { valid: true, error: null };
 };

@@ -173,6 +173,12 @@ describe('compareToAverage', () => {
   test('zero footprint returns Low percentile', () => {
     assert.strictEqual(compareToAverage(0).percentile, 'Low');
   });
+
+  test('uses the selected country average', () => {
+    const india = compareToAverage(100, 'India');
+    const usa = compareToAverage(100, 'USA');
+    assert.ok(india.vsCountry > usa.vsCountry);
+  });
 });
 
 // ============================================================================
@@ -363,6 +369,10 @@ describe('validateMeals', () => {
   test('accepts MAX_MEALS_INPUT exactly', () => {
     assert.strictEqual(validateMeals(MAX_MEALS_INPUT).valid, true);
   });
+
+  test('rejects fractional meal counts', () => {
+    assert.strictEqual(validateMeals(1.5).valid, false);
+  });
 });
 
 // ============================================================================
@@ -424,6 +434,10 @@ describe('validatePurchases', () => {
 
   test('rejects NaN string', () => {
     assert.strictEqual(validatePurchases('xyz').valid, false);
+  });
+
+  test('rejects fractional purchase counts', () => {
+    assert.strictEqual(validatePurchases(1.5).valid, false);
   });
 });
 

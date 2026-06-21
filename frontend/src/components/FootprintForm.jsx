@@ -90,7 +90,7 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
         </div>
 
         {profile.dietType !== 'vegan' && profile.dietType !== 'vegetarian' && (
-          <div className="form-group footprint-form__group fade-in" style={{ animationDelay: '0.1s' }}>
+          <div className="form-group footprint-form__group fade-in delay-1">
             <label htmlFor="meatMeals">
               Meat-based meals
               <span className="form-label-hint">This week (max 21)</span>
@@ -113,7 +113,7 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
           </div>
         )}
 
-        <div className="form-group footprint-form__group fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="form-group footprint-form__group fade-in delay-2">
           <label htmlFor="energyKwh">
             Electricity usage
             <span className="form-label-hint">kWh this week</span>
@@ -135,7 +135,7 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
           {errors.energyKwh && <span id="energyKwh-error" className="footprint-form__error" role="alert">{errors.energyKwh}</span>}
         </div>
 
-        <div className="form-group footprint-form__group fade-in" style={{ animationDelay: '0.3s' }}>
+        <div className="form-group footprint-form__group fade-in delay-3">
           <label htmlFor="purchases">
             Online purchases
             <span className="form-label-hint">Deliveries this week</span>

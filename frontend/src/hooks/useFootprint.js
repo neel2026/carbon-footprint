@@ -7,7 +7,7 @@ const buildEntry = (inputs, profile) => {
   return { date: new Date().toISOString(), inputs, total, breakdown };
 };
 
-const processInsightResult = (data, fetchErr, entry, setError, setInsight) => {
+const processInsightResult = (data, fetchErr, entry, profile, setError, setInsight) => {
   if (fetchErr) {
     const msg = fetchErr === 'timeout' ? 'Taking longer than usual, try again' : 'Something went wrong. Please try again.';
     setError(msg); return { success: false, entry, error: msg };
@@ -15,7 +15,7 @@ const processInsightResult = (data, fetchErr, entry, setError, setInsight) => {
   if (data?.error) {
     setError(data.error); return { success: false, entry, error: data.error };
   }
-  setInsight({ ...data, currentEntry: entry });
+  setInsight({ ...data, currentEntry: entry, profile });
   return { success: true, entry };
 };
 
@@ -36,7 +36,7 @@ export const useFootprint = () => {
     });
     setIsLoading(false);
     pendingRef.current = false;
-    return processInsightResult(data, err, entry, setError, setInsight);
+    return processInsightResult(data, err, entry, profile, setError, setInsight);
   }, []);
 
   return { submitFootprint, isLoading, error, insight };
