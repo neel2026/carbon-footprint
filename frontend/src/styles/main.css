@@ -1,0 +1,416 @@
+/* 1. CSS reset / base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* 2. CSS custom properties (variables) */
+:root {
+  --color-bg: #0B1120;
+  --color-surface: #131F35;
+  --color-surface-2: #1C2D4A;
+  --color-accent: #22C55E;
+  --color-accent-warm: #F59E0B;
+  --color-danger: #EF4444;
+  --color-text: #F1F5F9;
+  --color-muted: #94A3B8;
+  --color-border: #1E3A5F;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* 3. Layout (app shell, main containers) */
+.app-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.app-header {
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.app-title {
+  font-family: Georgia, serif;
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.app-greeting {
+  color: var(--color-muted);
+  font-size: 1.2rem;
+}
+
+/* 4. Components */
+/* Onboarding */
+.onboarding-container {
+  max-width: 500px;
+  margin: 0 auto;
+  background: var(--color-surface);
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.onboarding-title {
+  font-family: Georgia, serif;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.onboarding-subtitle {
+  color: var(--color-muted);
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+.onboarding-input,
+.onboarding-select,
+.footprint-form__input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  border-radius: 6px;
+  font-size: 1rem;
+}
+
+.onboarding-input:focus,
+.onboarding-select:focus,
+.footprint-form__input:focus {
+  outline: 2px solid var(--color-accent);
+  border-color: transparent;
+}
+
+.onboarding-submit-btn,
+.footprint-form__submit-btn,
+.btn-secondary {
+  width: 100%;
+  padding: 1rem;
+  background: var(--color-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.onboarding-submit-btn:hover,
+.footprint-form__submit-btn:hover {
+  opacity: 0.9;
+}
+
+.btn-secondary {
+  background: var(--color-surface-2);
+  margin-top: 1rem;
+}
+
+.btn-secondary:hover {
+  opacity: 0.9;
+}
+
+/* Footprint Form */
+.footprint-form {
+  background: var(--color-surface);
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.footprint-form__title {
+  margin-bottom: 1.5rem;
+}
+
+.footprint-form__group {
+  margin-bottom: 1.5rem;
+}
+
+.footprint-form__label {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.footprint-form__error {
+  color: var(--color-danger);
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.footprint-form__error--global {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 6px;
+}
+
+.footprint-form__input--error {
+  border-color: var(--color-danger);
+}
+
+.footprint-form__submit-btn:disabled {
+  background: var(--color-muted);
+  cursor: not-allowed;
+}
+
+/* Insights */
+.insights-view__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.insights-view__header .btn-secondary {
+  width: auto;
+  margin: 0;
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+}
+
+.insights-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Chart */
+.footprint-chart {
+  background: var(--color-surface);
+  padding: 2rem;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.footprint-chart__total {
+  margin-bottom: 1rem;
+}
+
+.footprint-chart__number {
+  font-family: monospace;
+  font-size: 3.5rem;
+  font-weight: bold;
+  display: block;
+}
+
+.footprint-chart__unit {
+  color: var(--color-muted);
+  font-size: 1.2rem;
+}
+
+.footprint-chart__legend {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.footprint-chart__legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footprint-chart__legend-color {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.legend-color--transport { background-color: #F59E0B; }
+.legend-color--diet { background-color: #EF4444; }
+.legend-color--energy { background-color: #3B82F6; }
+.legend-color--shopping { background-color: #8B5CF6; }
+
+/* Action Card */
+.action-card {
+  background: var(--color-surface);
+  padding: 2rem;
+  border-radius: 12px;
+  border-left: 4px solid var(--color-accent);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  animation: slideIn 0.5s ease-out;
+}
+
+.action-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.action-card__icon {
+  font-size: 1.5rem;
+}
+
+.action-card__badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.action-card__badge--easy { background: rgba(34, 197, 94, 0.2); color: var(--color-accent); }
+.action-card__badge--medium { background: rgba(245, 158, 11, 0.2); color: var(--color-accent-warm); }
+.action-card__badge--hard { background: rgba(239, 68, 68, 0.2); color: var(--color-danger); }
+
+.action-card__title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.action-card__saving-number {
+  font-family: monospace;
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--color-accent);
+}
+
+.action-card__saving-text {
+  color: var(--color-muted);
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* AI Insight */
+.ai-insight {
+  background: var(--color-surface);
+  padding: 2rem;
+  border-radius: 12px;
+}
+
+.ai-insight__title {
+  margin-bottom: 1rem;
+  color: var(--color-accent-warm);
+}
+
+.ai-insight__recommendation {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.ai-insight__explanation {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  font-style: italic;
+}
+
+/* Progress Tracker */
+.progress-tracker {
+  background: var(--color-surface-2);
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.progress-tracker__streak,
+.progress-tracker__trend {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.progress-tracker__icon {
+  font-size: 1.2rem;
+}
+
+/* Error Boundary */
+.error-boundary {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.error-boundary__title {
+  margin-bottom: 1rem;
+  color: var(--color-danger);
+}
+
+.error-boundary__text {
+  margin-bottom: 2rem;
+  color: var(--color-muted);
+}
+
+.error-boundary__button {
+  padding: 0.75rem 1.5rem;
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+/* 5. States (loading, error, empty, success) */
+.app-loading {
+  text-align: center;
+  padding: 2rem;
+  color: var(--color-muted);
+}
+
+.app-error {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--color-danger);
+  padding: 1rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* 6. Responsive */
+@media (max-width: 600px) {
+  .app-container {
+    padding: 1rem;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+  }
+  
+  .footprint-chart__number {
+    font-size: 2.5rem;
+  }
+  
+  .action-card__title {
+    font-size: 1.25rem;
+  }
+  
+  .insights-view__header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+}

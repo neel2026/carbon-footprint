@@ -1,0 +1,19 @@
+// constants.js — EVERY number must come from here, never inline
+export const KG_CO2_PER_KM_CAR = 0.21;          // average petrol car
+export const KG_CO2_PER_KM_BUS = 0.089;
+export const KG_CO2_PER_KM_TRAIN = 0.041;
+export const KG_CO2_PER_KM_BIKE = 0;
+export const KG_CO2_PER_BEEF_MEAL = 3.3;        // per meal with beef
+export const KG_CO2_PER_CHICKEN_MEAL = 0.7;
+export const KG_CO2_PER_VEGAN_MEAL = 0.3;
+export const KG_CO2_PER_KWH = 0.82;             // India grid average
+export const KG_CO2_PER_ONLINE_PURCHASE = 4.5;  // avg delivery + packaging
+export const KG_CO2_PER_FLIGHT_HOUR = 90;       // per passenger hour
+export const INDIA_AVERAGE_ANNUAL_KG = 1900;     // India avg per capita
+export const WORLD_AVERAGE_ANNUAL_KG = 4800;
+export const MAX_JOURNAL_LENGTH = 500;
+export const MAX_KM_INPUT = 2000;
+export const MAX_MEALS_INPUT = 21;
+export const MAX_KWH_INPUT = 10000;
+export const HISTORY_DAYS = 7;
+export const AI_TIMEOUT_MS = 15000;
