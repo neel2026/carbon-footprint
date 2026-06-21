@@ -17,6 +17,10 @@ export const InsightsView = memo(({ insight, handleBack }) => (
     </div>
     <div className="insights-content">
       <FootprintChart breakdown={insight.currentEntry.breakdown} total={insight.currentEntry.total} />
+      <div className="insights-view__comparison">
+        <p>You are using <strong>{insight.currentEntry.total.toFixed(1)} kg CO₂</strong>.</p>
+        <p>This is <strong>{insight.highestImpactCategory}</strong>-heavy compared to average.</p>
+      </div>
       <ActionCard 
         action={insight.action} 
         estimatedSavingKg={insight.estimatedSavingKg} 

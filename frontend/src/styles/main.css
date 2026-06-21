@@ -10,7 +10,7 @@
   --color-bg: #0B1120;
   --color-surface: #131F35;
   --color-surface-2: #1C2D4A;
-  --color-accent: #22C55E;
+  --color-accent: #16A34A;
   --color-accent-warm: #F59E0B;
   --color-danger: #EF4444;
   --color-text: #F1F5F9;
@@ -112,6 +112,7 @@ body {
   font-size: 1.1rem;
   font-weight: 600;
   cursor: pointer;
+  min-height: 44px;
   transition: opacity 0.2s, transform 0.1s;
 }
 
@@ -300,6 +301,15 @@ body {
   to {
     transform: translateY(0);
     opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 

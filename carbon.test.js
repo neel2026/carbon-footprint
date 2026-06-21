@@ -29,7 +29,7 @@ import {
   MAX_KWH_INPUT,
   MAX_PURCHASES_INPUT,
   KG_CO2_PER_KM_CAR,
-  KG_CO2_PER_KWH,
+  KG_CO2_PER_KWH_MAP,
   KG_CO2_PER_ONLINE_PURCHASE,
   KG_CO2_PER_VEGAN_MEAL,
   INDIA_AVERAGE_ANNUAL_KG,
@@ -77,7 +77,7 @@ describe('calculateFootprint', () => {
 
   test('energy calculation uses correct constant', () => {
     const { breakdown } = calculateFootprint({ energyKwh: 10 });
-    assert.strictEqual(Number(breakdown.energy.toFixed(2)), Number((10 * KG_CO2_PER_KWH).toFixed(2)));
+    assert.strictEqual(Number(breakdown.energy.toFixed(2)), Number((10 * KG_CO2_PER_KWH_MAP['Other']).toFixed(2)));
   });
 
   test('shopping calculation uses correct constant', () => {

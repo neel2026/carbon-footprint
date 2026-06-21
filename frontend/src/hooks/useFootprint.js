@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { calculateFootprint, getHighestImpactCategory } from '../utils/carbon.js';
 import { fetchWithTimeout } from '../utils/api.js';
 
@@ -25,7 +25,7 @@ export const useFootprint = () => {
   const [insight, setInsight] = useState(null);
   const pendingRef = useRef(false);
 
-  const submitFootprint = async (profile, inputs, history) => {
+  const submitFootprint = useCallback(async (profile, inputs, history) => {
     if (pendingRef.current) return { success: false, entry: null, error: 'Already submitting' };
     pendingRef.current = true;
     setIsLoading(true); setError(null); setInsight(null);
@@ -37,7 +37,7 @@ export const useFootprint = () => {
     setIsLoading(false);
     pendingRef.current = false;
     return processInsightResult(data, err, entry, setError, setInsight);
-  };
+  }, []);
 
   return { submitFootprint, isLoading, error, insight };
 };

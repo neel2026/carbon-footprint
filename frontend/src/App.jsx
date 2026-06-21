@@ -6,11 +6,12 @@ import { InsightsView } from './components/InsightsView';
 import { getProfile, saveProfile } from './utils/storage';
 import { useFootprint } from './hooks/useFootprint';
 import { useHistory } from './hooks/useHistory';
-import './styles/main.css';
+
+const initialProfile = getProfile();
 
 function App() {
-  const [profile, setProfile] = useState(() => getProfile());
-  const [view, setView] = useState(() => (getProfile() ? 'dashboard' : 'onboarding'));
+  const [profile, setProfile] = useState(initialProfile);
+  const [view, setView] = useState(initialProfile ? 'dashboard' : 'onboarding');
   const { history, addEntry } = useHistory();
   const { submitFootprint, isLoading, error, insight } = useFootprint();
 

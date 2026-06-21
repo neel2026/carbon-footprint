@@ -80,6 +80,9 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
             onChange={handleChange}
             className={`footprint-form__input ${errors.transportKm ? 'footprint-form__input--error' : ''}`}
             disabled={isLoading}
+            min="0"
+            max="10000"
+            step="1"
             aria-invalid={!!errors.transportKm}
             aria-describedby={errors.transportKm ? 'transportKm-error' : undefined}
           />
@@ -97,6 +100,9 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
               onChange={handleChange}
               className={`footprint-form__input ${errors.meatMeals ? 'footprint-form__input--error' : ''}`}
               disabled={isLoading}
+              min="0"
+              max="100"
+              step="1"
               aria-invalid={!!errors.meatMeals}
               aria-describedby={errors.meatMeals ? 'meatMeals-error' : undefined}
             />
@@ -114,6 +120,9 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
             onChange={handleChange}
             className={`footprint-form__input ${errors.energyKwh ? 'footprint-form__input--error' : ''}`}
             disabled={isLoading}
+            min="0"
+            max="100000"
+            step="1"
             aria-invalid={!!errors.energyKwh}
             aria-describedby={errors.energyKwh ? 'energyKwh-error' : undefined}
           />
@@ -130,6 +139,9 @@ const FootprintForm = memo(({ onSubmit, isLoading, profile }) => {
             onChange={handleChange}
             className={`footprint-form__input ${errors.purchases ? 'footprint-form__input--error' : ''}`}
             disabled={isLoading}
+            min="0"
+            max="1000"
+            step="1"
             aria-invalid={!!errors.purchases}
             aria-describedby={errors.purchases ? 'purchases-error' : undefined}
           />

@@ -23,6 +23,15 @@ app.use(cors({
     cb(new Error('Not allowed by CORS'));
   }
 }));
+
+// Enforce Content-Type for POST requests
+app.use((req, res, next) => {
+  if (req.method === 'POST' && req.headers['content-type'] !== 'application/json') {
+    return res.status(415).json({ error: 'Content-Type must be application/json' });
+  }
+  next();
+});
+
 app.use(express.json({ limit: '10kb' }));
 
 // Rate Limiter: 10 requests per 15 minutes per IP
@@ -38,6 +47,38 @@ const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || 'dummy_key',
 });
 
+// Helper for type checking and limits
+const isValidNumber = (val, min, max) => typeof val === 'number' && isFinite(val) && val >= min && val <= max;
+const isValidString = (val, allowedValues) => typeof val === 'string' && allowedValues.includes(val);
+
+const validateInput = (body) => {
+  const { profile, currentEntry, history, breakdown, highestImpactCategory } = body;
+
+  if (!profile || !currentEntry || !breakdown || !highestImpactCategory) return 'Missing required top-level fields';
+  if (!isValidString(highestImpactCategory, ['transport', 'diet', 'energy', 'shopping'])) return 'Invalid highestImpactCategory';
+
+  if (!profile.name || typeof profile.name !== 'string' || profile.name.length > 50) return 'Invalid profile name';
+  if (!isValidString(profile.country, ['India', 'USA', 'UK', 'Other'])) return 'Invalid country';
+  if (!isValidString(profile.transportMode, ['car', 'bus', 'train', 'bike'])) return 'Invalid transportMode';
+  if (!isValidString(profile.dietType, ['omnivore', 'vegetarian', 'vegan'])) return 'Invalid dietType';
+
+  const inputs = currentEntry.inputs;
+  if (!inputs) return 'Missing currentEntry.inputs';
+  
+  if (!isValidNumber(inputs.transportKm, 0, 10000)) return 'Invalid transportKm';
+  if (inputs.meatMeals !== undefined && !isValidNumber(inputs.meatMeals, 0, 100)) return 'Invalid meatMeals';
+  if (!isValidNumber(inputs.energyKwh, 0, 100000)) return 'Invalid energyKwh';
+  if (!isValidNumber(inputs.purchases, 0, 1000)) return 'Invalid purchases';
+
+  for (const key of ['transport', 'diet', 'energy', 'shopping']) {
+    if (!isValidNumber(breakdown[key], 0, 1000000)) return `Invalid breakdown.${key}`;
+  }
+
+  if (history && !Array.isArray(history)) return 'History must be an array';
+
+  return null; // Valid
+};
+
 // GET /api/health
 app.get('/api/health', (req, res) => {
   res.json({
@@ -50,21 +91,34 @@ app.get('/api/health', (req, res) => {
 // POST /api/insight
 app.post('/api/insight', async (req, res) => {
   try {
-    const { profile, currentEntry, history, breakdown, highestImpactCategory } = req.body;
-
-    if (!profile || !breakdown || !highestImpactCategory) {
-      return res.status(400).json({ error: 'Missing required data' });
+    const errorMsg = validateInput(req.body);
+    if (errorMsg) {
+      return res.status(400).json({ error: errorMsg });
     }
 
-    const promptData = JSON.stringify({ profile, breakdown, highestImpactCategory });
+    const { profile, currentEntry, history, breakdown, highestImpactCategory } = req.body;
+
+    // Sanitize history to just recent trends to save tokens and prevent injection
+    const sanitizedHistory = (history || []).slice(0, 7).map(h => ({
+      date: h.date,
+      total: typeof h.total === 'number' ? Number(h.total.toFixed(2)) : 0
+    }));
+
+    const promptData = JSON.stringify({ 
+      profile, 
+      actualInputs: currentEntry.inputs,
+      breakdown, 
+      highestImpactCategory,
+      recentHistory: sanitizedHistory
+    });
 
     const systemPrompt = `You are a carbon footprint reduction coach with deep knowledge of climate science and behavioral psychology.
 
-You receive a user's actual footprint data broken down by category.
+You receive a user's actual footprint data broken down by category, their EXACT weekly inputs (like km driven or meat meals eaten), and their recent history.
 Your job is NOT to give generic climate advice.
 Your job is to find the SINGLE highest-leverage action for THIS specific person based on their actual numbers, and explain exactly how much CO2 they would save.
 
-Be specific. Be honest. Be actionable. Not preachy.
+Be specific. Be honest. Be actionable. Not preachy. Use the actual inputs provided to make the recommendation (e.g. if they drove 200km, suggest reducing it by 20km).
 
 Return ONLY valid JSON. No markdown. No preamble. No explanation outside JSON.
 
@@ -96,15 +150,32 @@ Rules:
 
     const rawContent = response.text;
     const jsonStr = rawContent.replace(/```json\n?|\n?```/g, '').trim();
-    const insight = JSON.parse(jsonStr);
+    
+    let insight;
+    try {
+      insight = JSON.parse(jsonStr);
+    } catch (e) {
+      console.error("Failed to parse AI JSON:", rawContent);
+      return res.status(502).json({ error: 'AI returned invalid data format' });
+    }
+
+    // Validate AI schema
+    const requiredAIKeys = ['recommendation', 'action', 'estimatedSavingKg', 'savingExplanation', 'category', 'difficulty'];
+    for (const k of requiredAIKeys) {
+      if (!(k in insight)) {
+        console.error("Missing key in AI response:", k);
+        return res.status(502).json({ error: 'AI response missing required fields' });
+      }
+    }
 
     res.json(insight);
-  } catch {
+  } catch (error) {
+    console.error("Insight generation error:", error);
     res.status(500).json({ error: 'Unable to generate insight. Please try again.' });
   }
 });
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV !== 'production' && process.env.npm_lifecycle_event !== 'test') {
   app.listen(port);
 }
 
