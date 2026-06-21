@@ -4,7 +4,6 @@ export const KG_CO2_PER_KM_BUS = 0.089;
 export const KG_CO2_PER_KM_TRAIN = 0.041;
 export const KG_CO2_PER_KM_BIKE = 0;
 export const KG_CO2_PER_BEEF_MEAL = 3.3;        // per meal with beef
-export const KG_CO2_PER_CHICKEN_MEAL = 0.7;
 export const KG_CO2_PER_VEGAN_MEAL = 0.3;
 export const KG_CO2_PER_KWH = 0.82;             // India grid average
 export const KG_CO2_PER_ONLINE_PURCHASE = 4.5;  // avg delivery + packaging
